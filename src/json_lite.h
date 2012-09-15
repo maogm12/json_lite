@@ -55,7 +55,7 @@ namespace json_lite
     };
     
     ///
-    /// \enum   json_parser_error
+    /// \enum   json_parse_error
     /// \brief  The errors in json parse
     ///
     enum json_parse_error
@@ -113,14 +113,14 @@ namespace json_lite
     {
     public:
          ///
-         /// \fn         json_value
+         /// \fn         json_value(json_type _type)
          /// \brief      The constructor of json_value
          /// \param      _type  The type of the element
          ///
          json_value(json_type _type);
 
         ///
-        /// \fn         json_value
+        /// \overload    json_value(json_type _type, std::string _value)
         /// \brief       The constructor of json_value
         /// \param       _type  The type of the element
         /// \param       _value The value of the element
@@ -194,7 +194,7 @@ namespace json_lite
         json_value* get_next() const;
 
         ///
-        /// \fn         get_next
+        /// \fn         get_prev
         /// \brief      Get the previous node of the element
         ///
         json_value* get_prev() const;
@@ -236,7 +236,7 @@ namespace json_lite
         void add_pair(std::string _key, json_value* _value);
 
         ///
-        /// \fn         output
+        /// \fn         output(const std::string out_file, bool format = true, int indent_level = 0)
         /// \brief      Print the json tree
         /// \param      out_file        The output file name
         /// \param      format          Format the document
@@ -246,7 +246,7 @@ namespace json_lite
         bool output(const std::string out_file, bool format = true, int indent_level = 0);
         
         ///
-        /// \fn         output
+        /// \overload   output(const char* out_file, bool format = true, int indent_level = 0)
         /// \brief      Print the json tree
         /// \param      out_file        The output file name
         /// \param      format          Format the document
@@ -256,7 +256,7 @@ namespace json_lite
         bool output(const char* out_file, bool format = true, int indent_level = 0);
 
         ///
-        /// \fn         output
+        /// \overload   output(bool format = true, int indent_level = 0)
         /// \brief      Print the json tree to the standard output
         /// \param      format          Format the document, default value is true
         /// \param      indent_level    The levels of indentation, default value is 0

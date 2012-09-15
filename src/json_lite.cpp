@@ -47,7 +47,7 @@ namespace json_lite
     }
     
     ///
-    /// \fn         safe_free
+    /// \overload   safe_free
     /// \brief      Delete dynamic c-style string safely
     ///
     template <>
@@ -375,7 +375,7 @@ namespace json_lite
     bool json_value::output(bool format, int indent_level)
     {
         assert(this);
-        bool result;  /**< if the output is successful. */
+        bool result;  // if the output is successful
         switch (this->get_type())
         {
         case JSON_STRING:
@@ -654,11 +654,11 @@ namespace json_lite
     // parse_string
     std::string json_parser::parse_string()
     {
-        std::string _value;         /**< the value of the string to parse .*/
-        char temp[BUF_SIZE],        /**< string buffer .*/
-             *p = temp;             /**< cursor to the current position of buffer.*/
+        std::string _value;         // the value of the string to parse
+        char temp[BUF_SIZE],        // string buffer
+             *p = temp;             // cursor to the current position of buffer
         memset(temp, 0, BUF_SIZE);
-        int cursor = 0;             /**< current character position of buffer .*/
+        int cursor = 0;             // current character position of buffer
 
         char temp_char = this->get_char();
         while (temp_char)
@@ -719,17 +719,17 @@ namespace json_lite
     // parse_number
     std::string json_parser::parse_number()
     {
-        std::string _number;        /**< the value of the number to parse .*/
-        char temp[BUF_SIZE],        /**< string buffer .*/
-             *p = temp;             /**< cursor to the current position of buffer.*/
+        std::string _number;        // the value of the number to parse
+        char temp[BUF_SIZE],        // string buffer
+             *p = temp;             // cursor to the current position of buffer
         memset(temp, 0, BUF_SIZE);
-        int cursor = 0;             /**< current character position of buffer .*/
+        int cursor = 0;             // current character position of buffer
 
-        bool dot_parsed = false,    /**< if the dot is parsed .*/
-             in_exponent = false,   /**< while parsing exponent, it turns true.*/
-             leading_zero = false,  /**< if it has leading zeros.*/
-             has_digit = false,     /**< if the part has digit.*/
-             has_sign = false;      /**< if the number has sign(+/-).*/
+        bool dot_parsed = false,    // if the dot is parsed
+             in_exponent = false,   // while parsing exponent, it turns true
+             leading_zero = false,  // if it has leading zeros
+             has_digit = false,     // if the part has digit
+             has_sign = false;      // if the number has sign(+/-)
 
         char temp_char = this->get_current_char();
         while (temp_char)

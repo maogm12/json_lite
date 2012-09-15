@@ -22,10 +22,10 @@ int main(int argc, char** argv)
     }
     
     // supposed to be failed 
-    char temp[10];
+    char temp[20];
     for (int i = 1; i <= 33; i++)
     {
-        memset(temp, 0, 10);
+        memset(temp, 0, 20);
         sprintf(temp, "tests\\fail%d.json", i);
         try
         {
