@@ -1,37 +1,41 @@
-/*
- *Copyright 2012 Garnel
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * @author  Garnel	
- * @email   maogm12[at]gmail.com
- * @date    2012/09/12
- * @version 2.0
- */
+///////////////////////////////////////////////////////////////////////////////
+///  Copyright 2012 Garnel
+///
+///  Licensed under the Apache License, Version 2.0 (the "License");
+///  you may not use this file except in compliance with the License.
+///  You may obtain a copy of the License at
+///
+///    http://www.apache.org/licenses/LICENSE-2.0
+///
+///  Unless required by applicable law or agreed to in writing, software
+///  distributed under the License is distributed on an "AS IS" BASIS,
+///  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/// See the License for the specific language governing permissions and
+/// limitations under the License.
+///////////////////////////////////////////////////////////////////////////////
+
+///
+/// \file       json_lite.cpp
+/// The implementation of class json_value and json_parser
+/// \author     Garnel
+/// \date       2012/09/12
+/// \version    2.1
+/// \copyright  Apache License, Version 2.0
+///
 
 #include "json_lite.h"
 
+///
+/// \namespace  json_lite
+///
 namespace json_lite
 {
-    /* --------------------------------------------------------------------------------------------- *
-     * safe_free
-     * --------------------------------------------------------------------------------------------- */
-    /**
-     * @brief       Delete memory allocated safely.
-     * @param       pT - The pointer to memory
-     * @warning     NOT deal with arrays
-     */
+    ///
+    /// \fn         safe_free
+    /// \brief      Delete memory allocated safely
+    /// \param      pT  The pointer to memory
+    /// \note       NOT deal with arrays
+    ///
     template <class T>
     void inline safe_free(T* &pT)
     {
@@ -42,9 +46,10 @@ namespace json_lite
         }
     }
     
-    /**
-     * @brief       Delete dynamic c-style string safely.
-     */
+    ///
+    /// \fn         safe_free
+    /// \brief      Delete dynamic c-style string safely
+    ///
     template <>
     void inline safe_free(char* &p)
     {
@@ -55,76 +60,88 @@ namespace json_lite
         }
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * print_error
-     * --------------------------------------------------------------------------------------------- */
-    void print_error(json_parse_error error_type)
+    // error_value
+    std::string error_value(json_parse_error error_type)
     {
         switch (error_type)
         {
         case SHOULD_BE_OBJECT_OR_ARRAY:
-            std::cout << "A json payload should be an object or array." << std::endl;
+            return "A json payload should be an object or array.";
             break;
         case INVALID_TYPE:
-            std::cout << "There is no such a type." << std::endl;
+            return "There is no such a type.";
             break;
         case INVALID_CHARACTER:
-            std::cout << "Sorry, I can not recognize the character." << std::endl;
+            return "Sorry, I can not recognize the character.";
             break;
         case INVALID_ESCAPE_CHARACTER:
-            std::cout << "The character is not supposed to exist after '\\'." << std::endl;
+            return "The character is not supposed to exist after '\\'.";
             break;
         case INVALID_BASE:
-            std::cout << "The base of the number is not correct." << std::endl;
+            return "The base of the number is not correct.";
             break;
         case INVALID_EXPONENT:
-            std::cout << "The exponent of the number is not correct." << std::endl;
+            return "The exponent of the number is not correct.";
             break;
         case TOO_MANY_DOTS_IN_NUMBER:
-            std::cout << "The number is invalid because it has too many dots." << std::endl;
+            return "Some part has too many dots.";
+            break;
+        case LEADING_ZERO:
+            return "Some part has leading zeros.";
+            break;
+        case INVALID_SIGN_POSITION:
+            return "Signs should only appear in the front of numbers.";
+            break;
+        case MISSING_DIGIT:
+            return "Some part has no digit.";
+            break;
+        case TOO_MANY_SIGNS_IN_NUMBER:
+            return "Some part has too many signs.";
+            break;
+        case TOO_MANY_EXPONENTS:
+            return "The number has too many exponents.";
             break;
         case ERROR_IN_TRUE:
-            std::cout << "It is supposed to be \"true\", not anything else." << std::endl;
+            return "It is supposed to be \"true\", not anything else.";
             break;
         case ERROR_IN_FALSE:
-            std::cout << "It is supposed to be \"false\", not anything else." << std::endl;
+            return "It is supposed to be \"false\", not anything else.";
             break;
         case ERROR_IN_NULL:
-            std::cout << "It is supposed to be \"null\", not anything else." << std::endl;
+            return "It is supposed to be \"null\", not anything else.";
             break;
         case MISSING_COLON:
-            std::cout << "It is supposed to be a ':'." << std::endl;
+            return "It is supposed to be a ':'.";
             break;
         case MISSING_QUOTATION:
-            std::cout << "It is supposed to be a '\"'." << std::endl;
+            return "It is supposed to be a '\"'.";
             break;
         case EXTRA_COMMA:
-            std::cout << "There is extra comma in the object or array." << std::endl;
+            return "There is extra comma in the object or array.";
             break;
         case EMPTY_VALUE:
-            std::cout << "There seems to be nothing in the value." << std::endl;
+            return "There seems to be nothing in the value.";
             break;
         case UNCLOSED_OBJECT:
-            std::cout << "The object is unclosed." << std::endl;
+            return "The object is unclosed.";
             break;
         case UNCLOSED_ARRAY:
-            std::cout << "The array is unclosed." << std::endl;
+            return "The array is unclosed.";
             break;
         case EXTRA_CONTENT_AFTER_JSON:
-            std::cout << "There is needless content after json." << std::endl;
+            return "There is needless content after json.";
             break;
         default:
-            std::cout << "There must be some error." << std::endl;
+            return "There must be some error.";
             break;
         }
     }
 
-    /* ********************************************************************************************* *
-     *                             json_value
-     * ********************************************************************************************* */
-    /* --------------------------------------------------------------------------------------------- *
-     * json_value
-     * --------------------------------------------------------------------------------------------- */
+    ///////////////////////////////////////////////////////////////////////////
+    // json_value
+    ///////////////////////////////////////////////////////////////////////////
+
+    // json_value
     json_value::json_value(json_type _type)
         :type(_type),
          next(NULL),
@@ -161,9 +178,7 @@ namespace json_lite
         this->set_value(_value);
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * ~json_value
-     * --------------------------------------------------------------------------------------------- */
+    // ~json_value
     json_value::~json_value()
     {
         // delete the child first
@@ -180,25 +195,17 @@ namespace json_lite
         parent = NULL;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * get_type
-     * --------------------------------------------------------------------------------------------- */
+    // get_type
     json_type json_value::get_type() const
     {
         return type;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * set_value
-     * --------------------------------------------------------------------------------------------- */
+    // set_value
     void json_value::set_value(std::string _value)
     {
         switch (this->get_type())
         {
-        /**
-         * @todo
-         * check the value passed in.
-         */
         case JSON_STRING:
         case JSON_NUMBER:
             value = _value;
@@ -225,9 +232,7 @@ namespace json_lite
         }
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * get_value
-     * --------------------------------------------------------------------------------------------- */
+    // get_value
     std::string json_value::get_value() const
     {
         if (type == JSON_STRING)
@@ -240,94 +245,72 @@ namespace json_lite
         }
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * set_next
-     * --------------------------------------------------------------------------------------------- */
+    // set_next
     void json_value::set_next( json_value *_next )
     {
         assert(_next);
         next = _next;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * set_prev
-     * --------------------------------------------------------------------------------------------- */
+    // set_prev
     void json_value::set_prev( json_value *_prev )
     {
         assert(_prev);
         prev = _prev;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * set_parent
-     * --------------------------------------------------------------------------------------------- */
+    // set_parent
     void json_value::set_parent( json_value *_parent )
     {
         assert(_parent);
         parent = _parent;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * set_first_child
-     * --------------------------------------------------------------------------------------------- */
+    // set_first_child
     void json_value::set_first_child( json_value *_first_child )
     {
         assert(_first_child);
         first_child = _first_child;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * set_last_child
-     * --------------------------------------------------------------------------------------------- */
+    // set_last_child
     void json_value::set_last_child( json_value *_last_child )
     {
         assert(_last_child);
         last_child = _last_child;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * get_next
-     * --------------------------------------------------------------------------------------------- */
+    // get_next
     json_value* json_value::get_next() const
     {
         return next;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * get_prev
-     * --------------------------------------------------------------------------------------------- */
+    // get_prev
     json_value* json_value::get_prev() const
     {
         return prev;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * get_parent
-     * --------------------------------------------------------------------------------------------- */
+    // get_parent
     json_value* json_value::get_parent() const
     {
         return parent;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * get_first_child
-     * --------------------------------------------------------------------------------------------- */
+    // get_first_child
     json_value* json_value::get_first_child() const
     {
         return first_child;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * get_last_child
-     * --------------------------------------------------------------------------------------------- */
+    // get_last_child
     json_value* json_value::get_last_child() const
     {
         return last_child;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * add_child
-     * --------------------------------------------------------------------------------------------- */
+    // add_child
     void json_value::add_child( json_value* _child )
     {
         assert(_child);
@@ -345,10 +328,24 @@ namespace json_lite
             _child->set_parent(this);
         }
     }
+
+    // add_pair
+    void json_value::add_pair(std::string _key, json_value* _value)
+    {
+        assert(this->get_type() == JSON_OBJECT);
+        assert(_value != NULL);
+        
+        //key
+        json_value *_k = new json_value(JSON_STRING, _key);
+
+        //value
+        _k->add_child(_value);
+
+        //add pair
+        this->add_child(_k);
+    }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * output
-     * --------------------------------------------------------------------------------------------- */
+    // output
     bool json_value::output(const std::string out_file, bool format, int indent_level)
     {
         // the standard output, restore it at the end
@@ -400,9 +397,7 @@ namespace json_lite
         return result;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * print_json_object
-     * --------------------------------------------------------------------------------------------- */
+    // print_json_object
     bool print_json_object(json_value *obj, bool format, int indent_level)
     {
         // the json element must be a object
@@ -467,9 +462,7 @@ namespace json_lite
         return true;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * print_json_array
-     * --------------------------------------------------------------------------------------------- */
+    // print_json_array
     bool print_json_array(json_value *arr, bool format, int indent_level)
     {
         // the json element must be a array
@@ -517,9 +510,7 @@ namespace json_lite
         return true;
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * print_json_value
-     * --------------------------------------------------------------------------------------------- */
+    // print_json_value
     bool print_json_value(json_value *elem, bool format, int indent_level)
     {
         // only for strings, numbers, null, true and false
@@ -537,12 +528,11 @@ namespace json_lite
 
 
 
-    /* ********************************************************************************************* *
-     *                             json_parser
-     * ********************************************************************************************* */
-    /* --------------------------------------------------------------------------------------------- *
-     * json_parser
-     * --------------------------------------------------------------------------------------------- */
+    ///////////////////////////////////////////////////////////////////////////
+    // json_parser
+    ///////////////////////////////////////////////////////////////////////////
+
+    // json_parser
     json_parser::json_parser( const std::string file_name )
         :line(1),
          pos_in_line(1)
@@ -561,19 +551,15 @@ namespace json_lite
         current_char = buffer;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * ~json_parser
-     * --------------------------------------------------------------------------------------------- */
+    // ~json_parser
     json_parser::~json_parser()
     {
         //close the file
         if (json_file.is_open())
             json_file.close();
     }
-
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_value
-     * --------------------------------------------------------------------------------------------- */
+    
+    // parse_value
     json_value* json_parser::parse_value( json_type _type )
     {
         json_value *_value = NULL;
@@ -612,15 +598,13 @@ namespace json_lite
         }
         catch (json_parse_error error_type)
         {
-            this->error_message(error_type);
+            this->print_error(error_type);
             safe_free(_value);
             return (json_value*)NULL;
         }
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * run
-     * --------------------------------------------------------------------------------------------- */
+    // run
     json_value* json_parser::run()
     {
         //escape blank characters
@@ -649,14 +633,12 @@ namespace json_lite
         }
         catch (json_parse_error error_type)
         {
-            this->error_message(error_type);
+            this->print_error(error_type);
             return (json_value*)NULL;
         }
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * escape_blank
-     * --------------------------------------------------------------------------------------------- */
+    // escape_blank
     char json_parser::escape_blank()
     {
         char temp_char = this->get_current_char();
@@ -669,9 +651,7 @@ namespace json_lite
         return temp_char;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_string
-     * --------------------------------------------------------------------------------------------- */
+    // parse_string
     std::string json_parser::parse_string()
     {
         std::string _value;         /**< the value of the string to parse .*/
@@ -736,9 +716,7 @@ namespace json_lite
         return _value;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_number
-     * --------------------------------------------------------------------------------------------- */
+    // parse_number
     std::string json_parser::parse_number()
     {
         std::string _number;        /**< the value of the number to parse .*/
@@ -748,7 +726,10 @@ namespace json_lite
         int cursor = 0;             /**< current character position of buffer .*/
 
         bool dot_parsed = false,    /**< if the dot is parsed .*/
-             in_exponent = false;   /**< while parsing exponent, it turns true.*/
+             in_exponent = false,   /**< while parsing exponent, it turns true.*/
+             leading_zero = false,  /**< if it has leading zeros.*/
+             has_digit = false,     /**< if the part has digit.*/
+             has_sign = false;      /**< if the number has sign(+/-).*/
 
         char temp_char = this->get_current_char();
         while (temp_char)
@@ -758,8 +739,16 @@ namespace json_lite
             if (temp_char == ',' || temp_char == ']' || temp_char == '}' ||
                 temp_char == ' ' || temp_char == '\t' || temp_char == '\n' ||
                 temp_char == '\r')
+            {
+                if (!has_digit)  //number has no digits
+                    throw MISSING_DIGIT;
+
+                if (in_exponent && !has_digit) //exponent has nothing or only a sign
+                    throw INVALID_EXPONENT;
+
                 break;
-            
+            }
+
             //copy the character to the string(through buffer)
             *p++ = temp_char;
             cursor++;
@@ -775,6 +764,16 @@ namespace json_lite
             {
             //digits
             case '0':
+                if (leading_zero)  //leading zero
+                    throw LEADING_ZERO;
+                
+                if (!leading_zero && !has_digit)  //the first one is a zero
+                {
+                    leading_zero = true;
+                    has_digit = true;
+                }
+                break;
+
             case '1':
             case '2':
             case '3':
@@ -784,12 +783,25 @@ namespace json_lite
             case '7':
             case '8':
             case '9':
+                if (leading_zero)  //leading zero
+                    throw LEADING_ZERO;
+                has_digit = true;
+                break;
+
+            //has sign
             case '+':
             case '-':
+                if (has_digit)  //sign should in front of a number
+                    throw INVALID_SIGN_POSITION;
+                else if (has_sign)  //more than one sign
+                    throw TOO_MANY_SIGNS_IN_NUMBER;
+                else    
+                    has_sign = true;
                 break;
 
             //The dot
             case  '.':
+                leading_zero = false;
                 if (dot_parsed)
                     throw TOO_MANY_DOTS_IN_NUMBER;
                 else
@@ -799,38 +811,17 @@ namespace json_lite
             //exponent
             case 'e':
             case 'E':
+                if (!has_digit)  //the base has no digit
+                    throw MISSING_DIGIT;
+                
+                if (in_exponent)  //already has a exponent
+                    throw TOO_MANY_EXPONENTS;
+                
                 in_exponent = true;
                 dot_parsed = false;
-                this->get_char();
-                temp_char = this->get_current_char();
-                switch (temp_char)
-                {
-                case '+':
-                case '-':
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    *p++ = temp_char;
-                    cursor++;
-                    if (cursor == BUF_SIZE - 1)  //buffer is full
-                    {
-                        _number += temp;
-                        memset(temp, 0, BUF_SIZE);
-                        p = temp;
-                        cursor = 0;
-                    }
-                    break;
-                default:
-                    throw INVALID_EXPONENT;
-                    break;
-                }
+                has_digit = false;
+                has_sign = false;
+                leading_zero = false;
                 break;
             default:
                 if (in_exponent)
@@ -848,9 +839,7 @@ namespace json_lite
         return _number;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_true
-     * --------------------------------------------------------------------------------------------- */
+    // parse_true
     std::string json_parser::parse_true()
     {
         char temp[5],
@@ -868,9 +857,7 @@ namespace json_lite
         return "true";
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_false
-     * --------------------------------------------------------------------------------------------- */
+    // parse_false
     std::string json_parser::parse_false()
     {
         char temp[6],
@@ -889,9 +876,7 @@ namespace json_lite
         return "false";
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_null
-     * --------------------------------------------------------------------------------------------- */
+    // parse_null
     std::string json_parser::parse_null()
     {
         char temp[5],
@@ -909,9 +894,7 @@ namespace json_lite
         return "null";
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_object
-     * --------------------------------------------------------------------------------------------- */
+    // parse_object
     json_value* json_parser::parse_object()
     {
         json_value *obj = new json_value(JSON_OBJECT),
@@ -1048,9 +1031,7 @@ namespace json_lite
         }
     }
     
-    /* --------------------------------------------------------------------------------------------- *
-     * parse_array
-     * --------------------------------------------------------------------------------------------- */
+    // parse_array
     json_value* json_parser::parse_array()
     {
         json_value *arr = new json_value(JSON_ARRAY),
@@ -1172,9 +1153,7 @@ namespace json_lite
         }
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * get_char
-     * --------------------------------------------------------------------------------------------- */
+    // get_char
     const char json_parser::get_char()
     {
         char temp_char = 0;
@@ -1200,9 +1179,7 @@ namespace json_lite
         return temp_char;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * get_current_char
-     * --------------------------------------------------------------------------------------------- */
+    // get_current_char
     const char json_parser::get_current_char()
     {
         char temp_char = 0;
@@ -1220,13 +1197,11 @@ namespace json_lite
         return temp_char;
     }
 
-    /* --------------------------------------------------------------------------------------------- *
-     * error_message
-     * --------------------------------------------------------------------------------------------- */
-    void json_parser::error_message(json_parse_error error_type) const
+    // print_error
+    void json_parser::print_error(json_parse_error error_type) const
     {
-        std::cout << "Error in json at line " 
-            << line << ", " << pos_in_line << ":" << std::endl;
-        print_error(error_type);
+        std::cout << "Error in json at line " << line 
+            << ", position " << pos_in_line << " :" << std::endl;
+        std::cout << error_value(error_type) << std::endl;
     }
 }
