@@ -14,6 +14,3 @@ Debug*
 *.lai
 *.la
 *.a
-
-#document
-doc*
