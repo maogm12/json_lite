@@ -236,33 +236,33 @@ namespace json_lite
         void add_pair(std::string _key, json_value* _value);
 
         ///
-        /// \fn         output(const std::string out_file, bool format = true, int indent_level = 0)
+        /// \fn         output(const std::string out_file, bool format = true, int indent_level = 0) const
         /// \brief      Print the json tree
         /// \param      out_file        The output file name
         /// \param      format          Format the document
         /// \param      indent_level    The levels of indentation, default value is 0
         /// \return     true for success, false for failure
         ///
-        bool output(const std::string out_file, bool format = true, int indent_level = 0);
+        bool output(const std::string out_file, bool format = true, int indent_level = 0) const;
         
         ///
-        /// \overload   output(const char* out_file, bool format = true, int indent_level = 0)
+        /// \overload   output(const char* out_file, bool format = true, int indent_level = 0) const
         /// \brief      Print the json tree
         /// \param      out_file        The output file name
         /// \param      format          Format the document
         /// \param      indent_level    The levels of indentation, default value is 0
         /// \return     true for success, false for failure
         ///
-        bool output(const char* out_file, bool format = true, int indent_level = 0);
+        bool output(const char* out_file, bool format = true, int indent_level = 0) const;
 
         ///
-        /// \overload   output(bool format = true, int indent_level = 0)
+        /// \overload   output(bool format = true, int indent_level = 0) const
         /// \brief      Print the json tree to the standard output
         /// \param      format          Format the document, default value is true
         /// \param      indent_level    The levels of indentation, default value is 0
         /// \return     true for success, false for failure
         ///
-        bool output(bool format = true, int indent_level = 0);
+        bool output(bool format = true, int indent_level = 0) const;
 
         ///
         /// \fn         print_json_object
@@ -272,7 +272,7 @@ namespace json_lite
         /// \param      indent_level    The level of indentation default value is 0
         /// \return     true for success, false for failure
         ///
-        friend bool print_json_object(json_value *obj, bool format, int indent_level = 0);
+        friend bool print_json_object(const json_value *obj, bool format, int indent_level = 0);
         
         ///
         /// \fn         print_json_array
@@ -282,16 +282,25 @@ namespace json_lite
         /// \param      indent_level    The levels of indentation, default value is 0
         /// \return     true for success, false for failure
         ///
-        friend bool print_json_array(json_value *arr, bool format, int indent_level = 0);
+        friend bool print_json_array(const json_value *arr, bool format, int indent_level = 0);
 
         ///
+        /// \fn         print_json_value
         /// \brief      Print the json value
         /// \param      elem            The json element
         /// \param      format          Format the document in the output file
         /// \param      indent_level    The levels of indentation, default value is 0
         /// \return     true for success, false for failure
         ///
-        friend bool print_json_value(json_value *elem, bool format, int indent_level = 0);
+        friend bool print_json_value(const json_value *elem, bool format, int indent_level = 0);
+
+        ///
+        /// \brief      Overload the operator << to output json conveniently
+        /// \param      output          The ostream
+        /// \param      value           Json value to be output
+        /// \return     The ostream
+        ///
+        friend std::ostream& operator<<(std::ostream& output, const json_value &value);
 
     private:
         json_value(){}  ///< default constructor is not allowed to use
@@ -415,6 +424,13 @@ namespace json_lite
         /// \return     A pointer to the json object
         ///
         json_value* parse_array();
+
+        ///
+        /// \fn         locate_element_by_label
+        /// \brief      Locate an element by label
+        /// \return     The offset of the element in the file
+        ///
+        std::ifstream::pos_type locate_element_by_label(const char* label, std::streampos offset = std::ios::cur);
 
         ///
         /// \fn         get_char

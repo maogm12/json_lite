@@ -6,9 +6,14 @@ using namespace json_lite;
 
 void test(string);
 string get_filename(string);
+void test_locate_label();
 
 int main(int argc, char** argv)
 {
+    //locate_element_by_label
+    test_locate_label();
+    cout << endl;
+
     // supposed to be passed 
     try
     {
@@ -49,8 +54,12 @@ void test(string input)
     json_value *doc = parser.run();
     if (doc)
     {
-        doc->output(output + get_filename(input));
+        //doc->output(output + get_filename(input));
+        ofstream fout((output + get_filename(input)).c_str());
+        fout << *doc;
+        fout.close();
         delete doc;
+        doc = NULL;
         cout << "successful~\n" << endl;
         return;
     }
@@ -61,4 +70,17 @@ string get_filename(string path)
 {
     string::size_type pos = path.rfind('\\');
     return string(path, pos + 1, string::npos);
+}
+
+
+void test_locate_label()
+{
+    json_parser parser("tests\\pass1.json");
+    parser.locate_element_by_label("integer", ios::beg);
+
+    cout << "The next 10 characters: ";
+    int i = 10;
+    while (i--)
+        cout << parser.get_char();
+    cout << endl;
 }

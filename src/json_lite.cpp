@@ -346,7 +346,7 @@ namespace json_lite
     }
     
     // output
-    bool json_value::output(const std::string out_file, bool format, int indent_level)
+    bool json_value::output(const std::string out_file, bool format, int indent_level) const
     {
         // the standard output, restore it at the end
         std::streambuf *std_buf = std::cout.rdbuf();
@@ -366,13 +366,13 @@ namespace json_lite
         return result;
     }
 
-    bool json_value::output(const char* out_file, bool format, int indent_level)
+    bool json_value::output(const char* out_file, bool format, int indent_level) const
     {
         std::string temp(out_file);
         return this->output(temp, format, indent_level);
     }
 
-    bool json_value::output(bool format, int indent_level)
+    bool json_value::output(bool format, int indent_level) const
     {
         assert(this);
         bool result;  // if the output is successful
@@ -398,7 +398,7 @@ namespace json_lite
     }
     
     // print_json_object
-    bool print_json_object(json_value *obj, bool format, int indent_level)
+    bool print_json_object(const json_value *obj, bool format, int indent_level)
     {
         // the json element must be a object
         assert(obj->get_type() == JSON_OBJECT);
@@ -430,7 +430,8 @@ namespace json_lite
             if ((_type == JSON_OBJECT || _type == JSON_ARRAY)
                 && cur_child->get_first_child() != NULL)   //empty object or array will be printed directly as "{}","[]"
             {
-                std::cout << '\n';
+                if (format)
+                    std::cout << '\n';
                 cur_child->output(format, indent_level);
             }
             else
@@ -463,7 +464,7 @@ namespace json_lite
     }
     
     // print_json_array
-    bool print_json_array(json_value *arr, bool format, int indent_level)
+    bool print_json_array(const json_value *arr, bool format, int indent_level)
     {
         // the json element must be a array
         assert(arr->get_type() == JSON_ARRAY);
@@ -511,7 +512,7 @@ namespace json_lite
     }
     
     // print_json_value
-    bool print_json_value(json_value *elem, bool format, int indent_level)
+    bool print_json_value(const json_value *elem, bool format, int indent_level)
     {
         // only for strings, numbers, null, true and false
         json_type _type = elem->get_type();
@@ -526,7 +527,18 @@ namespace json_lite
         return true;
     }
 
+    // operator<<
+    std::ostream& operator<<(std::ostream& output, const json_value &value)
+    {
+        // the standard output, restore it at the end
+        std::streambuf *std_buf = std::cout.rdbuf();
+        std::cout.rdbuf(output.rdbuf());
+        value.output(false);
 
+        // restore the standard output
+        std::cout.rdbuf(std_buf);
+        return output;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // json_parser
@@ -1151,6 +1163,38 @@ namespace json_lite
             safe_free(arr);
             throw error_type;
         }
+    }
+
+    // locate_element_by_label
+    std::streampos json_parser::locate_element_by_label(const char* label, std::streampos offset)
+    {
+        if (offset != json_file.tellg())
+            json_file.seekg(offset);
+
+        while (!json_file.eof())
+        {
+            char temp = get_char();
+            if (temp == '\\')  //escape characters
+            {
+                this->get_char();
+                continue;
+            }
+            
+            if (temp == '"') //a string
+            {
+                if (this->parse_string() == label)
+                {
+                    if (this->escape_blank() != ':')  //the string is not a label
+                        continue;
+
+                    this->get_char();  //escape ':'
+                    this->escape_blank();
+                    break;
+                }
+            }  
+        }
+
+        return json_file.tellg();
     }
 
     // get_char

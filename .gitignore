@@ -14,3 +14,6 @@ Debug*
 *.lai
 *.la
 *.a
+
+# No document files, the document link is in the readme.md
+doc/html*
