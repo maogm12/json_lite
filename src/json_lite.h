@@ -18,8 +18,8 @@
 /// \file       json_lite.h
 /// The declaration of json_value and json_class
 /// \author     Garnel
-/// \date       2012/09/15
-/// \version    2.1
+/// \date       2012/09/26
+/// \version    2.3
 /// \copyright  Apache License, Version 2.0
 ///
 
@@ -152,8 +152,7 @@ namespace json_lite
         ///
         /// \fn         get_value
         /// \brief      Return the value of the element
-        /// \warning    If the element is a string, the value will contain quotations
-        ///             objects and arrays have NO value, the value will be a empty string
+        /// \warning    Objects and arrays have NO value, the value will be a empty string
         ///
         std::string get_value() const;
         
@@ -216,6 +215,17 @@ namespace json_lite
         /// \brief      Get the last child node of the element
         ///
         json_value* get_last_child() const;
+
+        ///
+        /// \fn         get_child_by_label
+        /// \brief      Get the label's child
+        /// \param      label   The label to search
+        /// \note       If the label doesn't exist, NULL is returned
+        ///             If there is a string (not a label of some pair) equals the label, NULL is returned too
+        /// \warning    Do NOT delete the pointer returned
+        /// \return     The child of the label, or NULL if the label doesn't exist
+        ///
+        json_value* get_child_by_label(const std::string &label) const;
 
         ///
         /// \fn         add_child
@@ -428,9 +438,11 @@ namespace json_lite
         ///
         /// \fn         locate_element_by_label
         /// \brief      Locate an element by label
+        /// \param      label       The label to search
+        /// \note       Search from the current position
         /// \return     The offset of the element in the file
         ///
-        std::ifstream::pos_type locate_element_by_label(const char* label, std::streampos offset = std::ios::cur);
+        std::ifstream::pos_type locate_element_by_label(const char* label);
 
         ///
         /// \fn         get_char

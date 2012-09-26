@@ -18,8 +18,8 @@
 /// \file       json_lite.cpp
 /// The implementation of class json_value and json_parser
 /// \author     Garnel
-/// \date       2012/09/12
-/// \version    2.1
+/// \date       2012/09/26
+/// \version    2.3
 /// \copyright  Apache License, Version 2.0
 ///
 
@@ -235,14 +235,7 @@ namespace json_lite
     // get_value
     std::string json_value::get_value() const
     {
-        if (type == JSON_STRING)
-        {
-            return ("\"" + value + "\"");
-        }
-        else
-        {
-            return value;
-        }
+        return value;
     }
 
     // set_next
@@ -310,6 +303,30 @@ namespace json_lite
         return last_child;
     }
     
+    // get_child_by_label
+    json_value* json_value::get_child_by_label(const std::string &label) const
+    {
+        if (this->get_type() == JSON_STRING && this->get_value() == label)
+            return this->get_first_child();
+
+        json_value* elem;
+        if (this->get_first_child() != NULL)  //has children
+        {
+            elem = this->get_first_child()->get_child_by_label(label);
+            if (elem != NULL)
+                return elem;
+        }
+
+        if (this->get_next() != NULL)  //siblings
+        {
+            elem = this->get_next()->get_child_by_label(label);
+            if (elem != NULL)
+                return elem;
+        }
+
+        return NULL;
+    }
+
     // add_child
     void json_value::add_child( json_value* _child )
     {
@@ -523,7 +540,16 @@ namespace json_lite
             for (int i = 0; i < indent_level; i++)
                 std::cout << '\t';
         
-        std::cout << elem->get_value(); 
+        if (elem->get_type() == JSON_STRING)
+        {
+            std::cout << '"';
+            std::cout << elem->get_value();
+            std::cout << '"';
+        }
+        else
+        {
+            std::cout << elem->get_value();
+        }
         return true;
     }
 
@@ -1166,11 +1192,8 @@ namespace json_lite
     }
 
     // locate_element_by_label
-    std::streampos json_parser::locate_element_by_label(const char* label, std::streampos offset)
+    std::streampos json_parser::locate_element_by_label(const char* label)
     {
-        if (offset != json_file.tellg())
-            json_file.seekg(offset);
-
         while (!json_file.eof())
         {
             char temp = get_char();

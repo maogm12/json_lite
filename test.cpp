@@ -7,9 +7,16 @@ using namespace json_lite;
 void test(string);
 string get_filename(string);
 void test_locate_label();
+void test_get_by_label();
 
 int main(int argc, char** argv)
 {
+    //get_child_by_label
+    test_get_by_label();
+    system("pause");
+    return 0;
+
+
     //locate_element_by_label
     test_locate_label();
     cout << endl;
@@ -76,11 +83,26 @@ string get_filename(string path)
 void test_locate_label()
 {
     json_parser parser("tests\\pass1.json");
-    parser.locate_element_by_label("integer", ios::beg);
+    parser.locate_element_by_label("integer");
 
     cout << "The next 10 characters: ";
     int i = 10;
     while (i--)
         cout << parser.get_char();
+    cout << endl;
+}
+
+
+void test_get_by_label()
+{
+    json_parser parser("tests\\pass1.json");
+    json_value *doc = parser.run();
+    if (doc)
+    {
+        json_value* elem = doc->get_child_by_label("object with 1 member");
+        if (elem != NULL)
+            elem->output();
+        delete doc;
+    }
     cout << endl;
 }
